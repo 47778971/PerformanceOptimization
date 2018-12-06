@@ -60,7 +60,6 @@ public class ContactsHelper {
                     phoneContactsInfo.phone = cursor.getString(cursor.getColumnIndex(PHONE_NUMBER));
                     phoneContactsInfo.phone = phoneContactsInfo.phone.replace(" ", "");
                     phoneContactsInfo.name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
-                    phoneContactsInfo.email = cursor.getString(cursor.getColumnIndex(EMAIL_DATA));
                     if (phoneNumbers.get(phoneContactsInfo.name) == null) {
                         List<String> numbers = new ArrayList<>();
                         numbers.add(phoneContactsInfo.phone);
