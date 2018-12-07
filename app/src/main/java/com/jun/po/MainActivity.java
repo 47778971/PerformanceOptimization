@@ -1,25 +1,17 @@
 package com.jun.po;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.google.gson.Gson;
-import com.jun.po.aspectjx.ITrack;
 import com.jun.po.model.ContactsInfo;
-import com.jun.po.util.ANRUtils;
-import com.jun.po.util.ContactsHelper;
-import com.jun.po.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +19,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     List<ContactsInfo> allContacts = new ArrayList<>();
-    LinearLayout layout;
+    private Button button1;
+    private Button button2;
 
 //    private ImageView imageView;
 
@@ -35,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        layout = findViewById(R.id.layout);
+        button1 = findViewById(R.id.button1);
+        button2 = findViewById(R.id.button2);
+
 //        imageView = findViewById(R.id.image_view);
 
 //        new Thread(new Runnable() {
@@ -47,25 +42,27 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        }).start();
 
-        for (int i = 0; i < 100; i++) {
-            TextView view = new TextView(this);
-            view.setText(i + "" + i + "" + i + "" + i + "" + i);
-            view.setTextColor(Color.BLACK);
-            view.setHeight(200);
-            view.setGravity(Gravity.CENTER);
-            view.setTextSize(16);
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Intent intent = new Intent("com.jun.po.MyBroadcastAction");
+//                sendBroadcast(intent);
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            });
-            layout.addView(view);
-        }
+                Log.i("MyBroadcastReceiver", "onReceive");
+            }
+        });
+
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "button2", Toast.LENGTH_LONG).show();
+            }
+        });
+
 
 //        for (int i = 0; i<300;i++){
 //            ContactsInfo contactsInfo = new ContactsInfo();
@@ -79,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
 //        loadImage();
 
-        ANRUtils.catchAnr(this);
+//        ANRUtils.catchAnr(this);
     }
 
 
