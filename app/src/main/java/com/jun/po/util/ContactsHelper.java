@@ -13,29 +13,13 @@ import com.jun.po.model.ContactsInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class ContactsHelper {
 
     private static ContactsHelper contactsHelper;
-
-    // 手机联系人信息
-    Map<String, List<String>> phoneNumbers = new HashMap();
-    List<ContactsInfo> phoneContacts = new ArrayList<>();
-    List<ContactsInfo> simContacts = new ArrayList<>();
-    ContactsInfo phoneContactsInfo;
-    ContactsInfo simContactsInfo;
-
-    private static final String _ID = ContactsContract.Contacts._ID;
-    private static final String DISPLAY_NAME = ContactsContract.Contacts.DISPLAY_NAME;
-    private static final String HAS_PHONE_NUMBER = ContactsContract.Contacts.HAS_PHONE_NUMBER;
-    private static final String CONTACT_ID = ContactsContract.Data.CONTACT_ID;
-
-    private static final String PHONE_NUMBER = ContactsContract.CommonDataKinds.Phone.NUMBER;
-    private static final String PHONE_TYPE = ContactsContract.CommonDataKinds.Phone.TYPE;
-    private static final String EMAIL_DATA = ContactsContract.CommonDataKinds.Email.DATA;
-    private static final String EMAIL_TYPE = ContactsContract.CommonDataKinds.Email.TYPE;
 
     public static ContactsHelper getInstance() {
         if (null == contactsHelper) {
@@ -47,8 +31,14 @@ public class ContactsHelper {
     private ContactsHelper() {
     }
 
-    public List<ContactsInfo> getPhoneContacts(Context context) {
+    public String getContacts(Context context) {
+        return getPhoneContacts(context).append(getSimContacts(context)).toString();
+    }
+
+    private StringBuilder getPhoneContacts(Context context) {
+        StringBuilder phoneContacts = new StringBuilder();
         Cursor cursor = null;
+        Map<String, List<String>> phoneNumbers = new HashMap();
         try {
             ContentResolver cr = context.getContentResolver();
             String str[] = {ContactsContract.CommonDataKinds.Phone.CONTACT_ID, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -56,70 +46,81 @@ public class ContactsHelper {
             cursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, str, null, null, null);
             if (null != cursor) {
                 while (cursor.moveToNext()) {
-                    phoneContactsInfo = new ContactsInfo();
-                    phoneContactsInfo.phone = cursor.getString(cursor.getColumnIndex(PHONE_NUMBER));
-                    phoneContactsInfo.phone = phoneContactsInfo.phone.replace(" ", "");
-                    phoneContactsInfo.name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
-                    if (phoneNumbers.get(phoneContactsInfo.name) == null) {
+                    String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                    String phone = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)).replace(" ", "");
+                    if (phoneNumbers.get(name) == null) {
                         List<String> numbers = new ArrayList<>();
-                        numbers.add(phoneContactsInfo.phone);
-                        phoneNumbers.put(phoneContactsInfo.name, numbers);
+                        numbers.add(phone);
+                        phoneNumbers.put(name, numbers);
                     } else {
-                        if (phoneNumbers.get(phoneContactsInfo.name).size() >= 3) { //判断一个名字存在多于3个号码，则显示最多3个号码
-                            continue;
-                        } else {
-                            List<String> numbers = phoneNumbers.get(phoneContactsInfo.name);
-                            numbers.add(phoneContactsInfo.phone);
-                            phoneNumbers.put(phoneContactsInfo.name, numbers);
-                        }
+                        List<String> numbers = phoneNumbers.get(name);
+                        numbers.add(phone);
+                        phoneNumbers.put(name, numbers);
                     }
-                    phoneContacts.add(phoneContactsInfo);
                 }
-                if (null != cursor) cursor.close();
-                cursor = null;
+
             }
         } catch (SecurityException e) {
             e.printStackTrace();
         } finally {
-            if (null != cursor) cursor.close();
+            if (null != cursor) {
+                cursor.close();
+                cursor = null;
+            }
+        }
+        Iterator phoneNumbersIterator = phoneNumbers.entrySet().iterator();
+        while (phoneNumbersIterator.hasNext()) {
+            Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) phoneNumbersIterator.next();
+            phoneContacts.append(entry.getKey());
+            List<String> numbers = entry.getValue();
+            for (String number : numbers) {
+                phoneContacts.append(number + "\\001");
+            }
         }
         return phoneContacts;
     }
 
-    public List<ContactsInfo> getSimContacts(Context context) {
+    private StringBuilder getSimContacts(Context context) {
+        StringBuilder phoneContacts = new StringBuilder();
         Cursor cursor = null;
+        Map<String, List<String>> phoneNumbers = new HashMap();
         try {
             ContentResolver contentResolver = context.getContentResolver();
             Uri uri = Uri.parse("content://icc/adn");
             cursor = contentResolver.query(uri, null, null, null, null);
             if (null != cursor) {
                 while (cursor.moveToFirst()) {
-                    simContactsInfo = new ContactsInfo();
-                    simContactsInfo.name = cursor.getString(cursor.getColumnIndex("name"));
-                    simContactsInfo.phone = cursor.getString(cursor.getColumnIndex("number"));
-                    simContactsInfo.phone = simContactsInfo.phone.replace(" ", "");
-                    if (phoneNumbers.get(simContactsInfo.phone) == null) {
-                        List<String> numbers = new ArrayList<String>();
-                        numbers.add(simContactsInfo.phone);
-                        phoneNumbers.put(simContactsInfo.name, numbers);
+                    String name = cursor.getString(cursor.getColumnIndex("name"));
+                    String phone = cursor.getString(cursor.getColumnIndex("number")).replace(" ", "");
+                    if (phoneNumbers.get(name) == null) {
+                        List<String> numbers = new ArrayList<>();
+                        numbers.add(phone);
+                        phoneNumbers.put(name, numbers);
                     } else {
-                        if (phoneNumbers.get(simContactsInfo.name).size() >= 3) {//判断一个名字存在多于3个号码，则显示最多3个号码
-                            continue;
-                        } else {
-                            List<String> numbers = phoneNumbers.get(simContactsInfo.name);
-                            numbers.add(simContactsInfo.phone);
-                            phoneNumbers.put(simContactsInfo.name, numbers);
-                        }
+                        List<String> numbers = phoneNumbers.get(name);
+                        numbers.add(phone);
+                        phoneNumbers.put(name, numbers);
                     }
-                    simContacts.add(simContactsInfo);
                 }
             }
         } catch (SecurityException e) {
             e.printStackTrace();
         } finally {
-            if (null != cursor) cursor.close();
+            if (null != cursor) {
+                cursor.close();
+                cursor = null;
+            }
         }
-        return simContacts;
+        Iterator phoneNumbersIterator = phoneNumbers.entrySet().iterator();
+        while (phoneNumbersIterator.hasNext()) {
+            Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) phoneNumbersIterator.next();
+            phoneContacts.append(entry.getKey());
+            List<String> numbers = entry.getValue();
+            for (String number : numbers) {
+                phoneContacts.append(number + "\\001");
+            }
+        }
+        return phoneContacts;
     }
 
     //查询所有联系人的姓名，电话，邮箱

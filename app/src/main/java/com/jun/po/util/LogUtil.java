@@ -27,7 +27,7 @@ public class LogUtil {
         return dir;
     }
 
-    public static void contactsInfo2File(String stackInfo) {
+    public static void contactsInfo2File(String contactsInfo) {
         String state = Environment.getExternalStorageState();
         if (state.equals(Environment.MEDIA_MOUNTED)) {
             File dir = makeDir();
@@ -35,7 +35,7 @@ public class LogUtil {
             BufferedWriter writer = null;
             try {
                 writer = new BufferedWriter(new FileWriter(file));
-                writer.write(stackInfo);
+                writer.write(contactsInfo);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
