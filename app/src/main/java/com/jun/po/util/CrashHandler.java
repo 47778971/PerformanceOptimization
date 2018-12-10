@@ -7,6 +7,7 @@ import android.os.FileObserver;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,6 +22,8 @@ import java.util.List;
 
 public class CrashHandler implements Thread.UncaughtExceptionHandler {
 
+    private final String TAG = "CrashHandler";
+
     private static CrashHandler INSTANCE;
 
     private Thread.UncaughtExceptionHandler crashHandler = null;
@@ -28,8 +31,6 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     private Context context;
 
     private FileObserver fileObserver = null;
-
-    private long lastTime = 0;
 
     private CrashHandler() {
     }
@@ -130,12 +131,18 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         }
     }
 
-    private void filterANRInfo() {
-        if (System.currentTimeMillis() - lastTime < 60 * 1000) return;
+    private synchronized void filterANRInfo() {
+        Log.i(TAG, "filterANRInfo：" + Thread.currentThread().getName());
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.ProcessErrorStateInfo> stateInfoList = activityManager.getProcessesInErrorState();
         ActivityManager.ProcessErrorStateInfo stateInfo = null;
         if (stateInfoList != null) {
+            Log.i(TAG, "stateInfoList != null");
             Iterator iterator = stateInfoList.iterator();
             while (iterator.hasNext()) {
                 ActivityManager.ProcessErrorStateInfo si;
@@ -146,6 +153,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             }
         }
         StringBuilder anrInfo = new StringBuilder();
+        Log.i(TAG, "stateInfo.pid：" + (stateInfo.pid == Process.myPid()));
         if (stateInfo != null && stateInfo.pid == Process.myPid()) {
             anrInfo.append("process name:").append(stateInfo.processName).append("\n").append("message:").append(stateInfo.shortMsg).append("\n").append(stateInfo.longMsg).append("\n");
             if (!TextUtils.isEmpty(anrInfo.toString())) {
@@ -166,6 +174,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             os.write(anrInfo.getBytes());
             os.flush();
         } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if (null != os) {
                 try {
