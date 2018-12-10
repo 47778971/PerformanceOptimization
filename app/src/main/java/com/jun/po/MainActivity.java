@@ -2,6 +2,7 @@ package com.jun.po;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Button;
 
 import com.bumptech.glide.Glide;
@@ -9,8 +10,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.jun.po.model.ContactsInfo;
-import com.jun.po.util.ContactsHelper;
-import com.jun.po.util.LogUtil;
+import com.jun.po.util.SnowFlake;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +32,12 @@ public class MainActivity extends AppCompatActivity {
 
 //        imageView = findViewById(R.id.image_view);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                LogUtil.contactsInfo2File(ContactsHelper.getInstance().getContacts(MainActivity.this));
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                LogUtil.contactsInfo2File(ContactsHelper.getInstance().getContacts(MainActivity.this));
+//            }
+//        }).start();
 
 //        button1.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 //                } catch (InterruptedException e) {
 //                    e.printStackTrace();
 //                }
-//                Log.i("MyBroadcastReceiver", "onReceive");
 //            }
 //        });
 //
@@ -72,8 +71,13 @@ public class MainActivity extends AppCompatActivity {
 //        loadImage();
 
 //        ANRUtils.catchAnr(this);
-    }
 
+        SnowFlake snowFlake = new SnowFlake(0, 0);
+        for (long i = 0; i < 100; i++) {
+            Long id = snowFlake.nextId();
+            Log.i("SnowFlake", "id:" + id);
+        }
+    }
 
     SimpleTarget<GlideDrawable> simpleTarget = new SimpleTarget<GlideDrawable>() {
         @Override

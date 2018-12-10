@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class LogUtil {
 
@@ -31,7 +32,7 @@ public class LogUtil {
         String state = Environment.getExternalStorageState();
         if (state.equals(Environment.MEDIA_MOUNTED)) {
             File dir = makeDir();
-            File file = new File(dir, "contacts.txt");
+            File file = new File(dir, "uuid" + UUID.randomUUID().toString() + ".txt");
             BufferedWriter writer = null;
             try {
                 writer = new BufferedWriter(new FileWriter(file));

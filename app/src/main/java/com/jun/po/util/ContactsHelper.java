@@ -71,7 +71,7 @@ public class ContactsHelper {
         Iterator phoneNumbersIterator = phoneNumbers.entrySet().iterator();
         while (phoneNumbersIterator.hasNext()) {
             Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) phoneNumbersIterator.next();
-            phoneContacts.append(entry.getKey());
+            phoneContacts.append(entry.getKey() + "\\001");
             List<String> numbers = entry.getValue();
             for (String number : numbers) {
                 phoneContacts.append(number + "\\001");
