@@ -19,6 +19,7 @@ public class LogUtil {
     }
 
     private static File makeDir() {
+
         String dcLog = "/dclog";
         File esd = Environment.getExternalStorageDirectory();
         File dir = new File(esd, dcLog);

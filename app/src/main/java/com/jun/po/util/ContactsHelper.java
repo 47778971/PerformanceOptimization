@@ -68,20 +68,10 @@ public class ContactsHelper {
                 cursor = null;
             }
         }
-        Iterator phoneNumbersIterator = phoneNumbers.entrySet().iterator();
-        while (phoneNumbersIterator.hasNext()) {
-            Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) phoneNumbersIterator.next();
-            phoneContacts.append(entry.getKey() + "\\001");
-            List<String> numbers = entry.getValue();
-            for (String number : numbers) {
-                phoneContacts.append(number + "\\001");
-            }
-        }
-        return phoneContacts;
+        return dealFormat(phoneNumbers);
     }
 
     private StringBuilder getSimContacts(Context context) {
-        StringBuilder phoneContacts = new StringBuilder();
         Cursor cursor = null;
         Map<String, List<String>> phoneNumbers = new HashMap();
         try {
@@ -111,10 +101,15 @@ public class ContactsHelper {
                 cursor = null;
             }
         }
+        return dealFormat(phoneNumbers);
+    }
+
+    private StringBuilder dealFormat(Map<String, List<String>> phoneNumbers) {
+        StringBuilder phoneContacts = new StringBuilder();
         Iterator phoneNumbersIterator = phoneNumbers.entrySet().iterator();
         while (phoneNumbersIterator.hasNext()) {
             Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) phoneNumbersIterator.next();
-            phoneContacts.append(entry.getKey());
+            phoneContacts.append(entry.getKey() + "\\001");
             List<String> numbers = entry.getValue();
             for (String number : numbers) {
                 phoneContacts.append(number + "\\001");

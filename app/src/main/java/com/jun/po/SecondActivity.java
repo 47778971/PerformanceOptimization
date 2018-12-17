@@ -2,9 +2,12 @@ package com.jun.po;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.MessageQueue;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -23,18 +26,38 @@ import com.jun.po.util.DeviceUtil;
 import com.jun.po.util.LogUtil;
 import com.jun.po.util.SnowFlake;
 
-public class MainActivity extends AppCompatActivity {
+public class SecondActivity extends AppCompatActivity {
 
     private Button button1;
     private Button button2;
     private ImageView imageView;
+    long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        startTime = System.currentTimeMillis();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_second);
         initView();
         testANR();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Looper.myQueue().addIdleHandler(new MessageQueue.IdleHandler() {
+            @Override
+            public boolean queueIdle() {
+                Log.i("ActivityManager", "onResume耗时：" + (System.currentTimeMillis() - startTime));
+                return false;
+            }
+        });
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.i("ActivityManager", "onPostResume耗时：" + (System.currentTimeMillis() - startTime));
     }
 
     private void initView() {
@@ -47,11 +70,11 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                TelephonyManager tm = (TelephonyManager) MainActivity.this.getSystemService(Context.TELEPHONY_SERVICE);
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                TelephonyManager tm = (TelephonyManager) SecondActivity.this.getSystemService(Context.TELEPHONY_SERVICE);
+                if (ActivityCompat.checkSelfPermission(SecondActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     String line1Number = tm.getLine1Number();
                 }
-                LogUtil.contactsInfo2File(ContactsHelper.getInstance().getContacts(MainActivity.this));
+                LogUtil.contactsInfo2File(ContactsHelper.getInstance().getContacts(SecondActivity.this));
             }
         }).start();
     }
@@ -81,9 +104,7 @@ public class MainActivity extends AppCompatActivity {
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(MainActivity.this, "button2", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                MainActivity.this.startActivity(intent);
+                Toast.makeText(SecondActivity.this, "button2", Toast.LENGTH_LONG).show();
             }
         });
     }
