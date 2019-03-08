@@ -2,6 +2,7 @@ package com.jun.po.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Process;
@@ -54,6 +55,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread thread, Throwable t) {
         try {
+            String page = getPage(t.getStackTrace());
             handleException(t);
             crashHandler.uncaughtException(thread, t);
             t.printStackTrace();
@@ -62,9 +64,22 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         }
     }
 
+    private String getPage(StackTraceElement[] elements) {
+        String page = "";
+        for (StackTraceElement element : elements) {
+            if (element.getClassName().contains("com.jun.po")) {
+                page = element.getFileName();
+                break;
+            }
+        }
+        return page;
+    }
+
     private boolean handleException(Throwable t) {
         if (null == t) return false;
-        saveCrashInfo(t);
+        Intent intent = new Intent(context, MyIntentService.class);
+        context.startService(intent);
+//        saveCrashInfo(t);
         return true;
     }
 
