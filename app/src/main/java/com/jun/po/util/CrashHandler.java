@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Process;
@@ -84,21 +85,42 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         Intent intent = new Intent(context, MyIntentService.class);
         context.startService(intent);
 //        saveCrashInfo(t);
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Intent intent = new Intent(context, CrashCollectActivity.class);
-                    PendingIntent restartIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                    am.set(AlarmManager.RTC, System.currentTimeMillis(), restartIntent);
-                    Process.killProcess(android.os.Process.myPid());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
+        crashCollect();
         return true;
+    }
+
+    private void crashCollect() {
+        SharedPreferences sp = context.getSharedPreferences("crashInfo", Context.MODE_PRIVATE);
+        long lastTime = sp.getLong("time", 0);
+        int lastOrder = sp.getInt("order", 0);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putLong("time", System.currentTimeMillis());
+        if (System.currentTimeMillis() - lastTime> 30 * 1000) {
+            editor.putInt("order", 1);
+            editor.commit();
+        } else {
+            if (lastOrder >= 2) {//持续崩溃3次，提醒用户
+                editor.putInt("order", 0);
+                editor.commit();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            Intent intent = new Intent(context, CrashCollectActivity.class);
+                            PendingIntent restartIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                            am.set(AlarmManager.RTC, System.currentTimeMillis(), restartIntent);
+                            Process.killProcess(android.os.Process.myPid());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+            } else {
+                editor.putInt("order", lastOrder + 1);
+                editor.commit();
+            }
+        }
     }
 
     private File makeDir() throws Exception {
