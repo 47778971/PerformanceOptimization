@@ -62,6 +62,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".SecondActivity" />
+        <activity
+            android:name=".CrashCollectActivity"
+            android:theme="@style/AppTranslucent" />
         <service
             android:name=".util.MyIntentService"
             android:exported="false"></service>

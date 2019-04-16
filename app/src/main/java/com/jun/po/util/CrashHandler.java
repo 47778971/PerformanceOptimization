@@ -1,6 +1,8 @@
 package com.jun.po.util;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
@@ -9,6 +11,8 @@ import android.os.Process;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.jun.po.CrashCollectActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -80,6 +84,20 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         Intent intent = new Intent(context, MyIntentService.class);
         context.startService(intent);
 //        saveCrashInfo(t);
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Intent intent = new Intent(context, CrashCollectActivity.class);
+                    PendingIntent restartIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    am.set(AlarmManager.RTC, System.currentTimeMillis(), restartIntent);
+                    Process.killProcess(android.os.Process.myPid());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
         return true;
     }
 
