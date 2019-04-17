@@ -95,27 +95,22 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         int lastOrder = sp.getInt("order", 0);
         SharedPreferences.Editor editor = sp.edit();
         editor.putLong("time", System.currentTimeMillis());
-        if (System.currentTimeMillis() - lastTime> 30 * 1000) {
+        if (System.currentTimeMillis() - lastTime > 30 * 1000) {
             editor.putInt("order", 1);
             editor.commit();
         } else {
             if (lastOrder >= 2) {//持续崩溃3次，提醒用户
                 editor.putInt("order", 0);
                 editor.commit();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            Intent intent = new Intent(context, CrashCollectActivity.class);
-                            PendingIntent restartIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                            AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                            am.set(AlarmManager.RTC, System.currentTimeMillis(), restartIntent);
-                            Process.killProcess(android.os.Process.myPid());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }.start();
+                try {
+                    Intent intent = new Intent(context, CrashCollectActivity.class);
+                    PendingIntent restartIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    am.set(AlarmManager.RTC, System.currentTimeMillis(), restartIntent);
+                    Process.killProcess(android.os.Process.myPid());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             } else {
                 editor.putInt("order", lastOrder + 1);
                 editor.commit();

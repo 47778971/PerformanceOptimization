@@ -20,7 +20,6 @@ import com.bumptech.glide.Glide;
 import com.jun.po.util.ContactsHelper;
 import com.jun.po.util.DeviceUtil;
 import com.jun.po.util.LogUtil;
-import com.jun.po.util.MyIntentService;
 import com.jun.po.util.SnowFlake;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
